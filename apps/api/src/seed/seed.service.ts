@@ -4,8 +4,12 @@ import { Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
 import { UsersService } from '../users/users.service'
 import { ProjectCategory } from '../projects/entities/project-category.entity'
+import { Project } from '../projects/entities/project.entity'
+import { ForumCategory } from '../forum/entities/forum-category.entity'
+import { ForumThread } from '../forum/entities/forum-thread.entity'
+import { ForumPost } from '../forum/entities/forum-post.entity'
 
-const SEED_CATEGORIES = [
+const SEED_PROJECT_CATEGORIES = [
   { name: 'Action', slug: 'action', displayOrder: 1 },
   { name: 'Adventure', slug: 'adventure', displayOrder: 2 },
   { name: 'RPG', slug: 'rpg', displayOrder: 3 },
@@ -13,6 +17,14 @@ const SEED_CATEGORIES = [
   { name: 'Puzzle', slug: 'puzzle', displayOrder: 5 },
   { name: 'Simulation', slug: 'simulation', displayOrder: 6 },
   { name: 'Tools & Engine', slug: 'tools', displayOrder: 7 },
+]
+
+const SEED_FORUM_CATEGORIES = [
+  { name: 'General', slug: 'general', description: 'General indie game discussion', displayOrder: 1 },
+  { name: 'Showcase', slug: 'showcase', description: 'Share your projects', displayOrder: 2 },
+  { name: 'Help & Questions', slug: 'help', description: 'Ask the community', displayOrder: 3 },
+  { name: 'Market Talk', slug: 'market', description: 'Buying, selling, pricing', displayOrder: 4 },
+  { name: 'Collaboration', slug: 'collab', description: 'Find teammates and partners', displayOrder: 5 },
 ]
 
 @Injectable()
@@ -23,11 +35,22 @@ export class SeedService implements OnModuleInit {
     private readonly usersService: UsersService,
     @InjectRepository(ProjectCategory)
     private readonly categoryRepo: Repository<ProjectCategory>,
+    @InjectRepository(Project)
+    private readonly projectRepo: Repository<Project>,
+    @InjectRepository(ForumCategory)
+    private readonly forumCatRepo: Repository<ForumCategory>,
+    @InjectRepository(ForumThread)
+    private readonly threadRepo: Repository<ForumThread>,
+    @InjectRepository(ForumPost)
+    private readonly postRepo: Repository<ForumPost>,
   ) {}
 
   async onModuleInit() {
     await this.seedAdminAccount()
-    await this.seedCategories()
+    await this.seedProjectCategories()
+    await this.seedForumCategories()
+    await this.seedDemoProjects()
+    await this.seedDemoThreads()
   }
 
   private async seedAdminAccount() {
@@ -42,13 +65,98 @@ export class SeedService implements OnModuleInit {
     this.logger.log(`Admin account seeded -> ${email}`)
   }
 
-  private async seedCategories() {
-    for (const cat of SEED_CATEGORIES) {
+  private async seedProjectCategories() {
+    for (const cat of SEED_PROJECT_CATEGORIES) {
       const exists = await this.categoryRepo.findOne({ where: { slug: cat.slug } })
       if (!exists) {
         await this.categoryRepo.save(this.categoryRepo.create(cat))
-        this.logger.log(`Category seeded -> ${cat.name}`)
+        this.logger.log(`Project category seeded -> ${cat.name}`)
       }
     }
+  }
+
+  private async seedForumCategories() {
+    for (const cat of SEED_FORUM_CATEGORIES) {
+      const exists = await this.forumCatRepo.findOne({ where: { slug: cat.slug } })
+      if (!exists) {
+        await this.forumCatRepo.save(this.forumCatRepo.create(cat))
+        this.logger.log(`Forum category seeded -> ${cat.name}`)
+      }
+    }
+  }
+
+  private async seedDemoProjects() {
+    const count = await this.projectRepo.count()
+    if (count > 0) return
+
+    const admin = await this.usersService.findByEmail(process.env.ADMIN_EMAIL || 'admin@flashdev.io')
+    if (!admin) return
+
+    const categories = await this.categoryRepo.find()
+    const demos = [
+      {
+        title: 'Neon Drifter',
+        description: 'A cyberpunk top-down racer built with Godot. Features procedural tracks and synthwave soundtrack.',
+        type: 'showcase' as const,
+        status: 'published' as const,
+        tags: ['racing', 'godot', 'cyberpunk'],
+        demoUrl: 'https://example.com/neon-drifter',
+      },
+      {
+        title: 'Pixel Dungeon Toolkit',
+        description: 'A complete roguelike starter kit with turn-based combat, inventory, and procedural dungeons.',
+        type: 'sale' as const,
+        status: 'published' as const,
+        price: 29.99,
+        tags: ['unity', 'roguelike', 'assets'],
+        thumbnailUrl: 'https://example.com/pixel-dungeon-thumb.jpg',
+      },
+      {
+        title: 'Echoes of the Void',
+        description: 'Narrative-driven space exploration prototype seeking collaborators for art and sound design.',
+        type: 'custom' as const,
+        status: 'draft' as const,
+        tags: ['narrative', 'space', 'prototype'],
+      },
+    ]
+
+    for (let i = 0; i < demos.length; i++) {
+      const project = this.projectRepo.create({
+        ...demos[i],
+        authorId: admin.id,
+        categoryId: categories[i % categories.length]?.id ?? null,
+      })
+      await this.projectRepo.save(project)
+      this.logger.log(`Demo project seeded -> ${project.title}`)
+    }
+  }
+
+  private async seedDemoThreads() {
+    const count = await this.threadRepo.count()
+    if (count > 0) return
+
+    const admin = await this.usersService.findByEmail(process.env.ADMIN_EMAIL || 'admin@flashdev.io')
+    if (!admin) return
+
+    const showcase = await this.forumCatRepo.findOne({ where: { slug: 'showcase' } })
+    if (!showcase) return
+
+    const thread = this.threadRepo.create({
+      title: 'Welcome to FlashDev Indie Game Forum',
+      body: 'This is a place to share your indie games, ask questions, and find collaborators. Feel free to introduce yourself!',
+      authorId: admin.id,
+      categoryId: showcase.id,
+      pinned: true,
+    })
+    const saved = await this.threadRepo.save(thread)
+
+    const post = this.postRepo.create({
+      threadId: saved.id,
+      authorId: admin.id,
+      content: 'Rules: be respectful, give constructive feedback, and have fun building games.',
+      depth: 0,
+    })
+    await this.postRepo.save(post)
+    this.logger.log('Demo forum thread seeded')
   }
 }

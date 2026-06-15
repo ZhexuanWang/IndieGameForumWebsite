@@ -6,6 +6,9 @@ import { HealthModule } from './health/health.module'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { ProjectsModule } from './projects/projects.module'
+import { ForumModule } from './forum/forum.module'
+import { LikesModule } from './likes/likes.module'
+import { FollowsModule } from './follows/follows.module'
 import { SeedModule } from './seed/seed.module'
 
 @Module({
@@ -16,6 +19,9 @@ import { SeedModule } from './seed/seed.module'
     UsersModule,
     AuthModule,
     ProjectsModule,
+    ForumModule,
+    LikesModule,
+    FollowsModule,
     SeedModule,
   ],
 })

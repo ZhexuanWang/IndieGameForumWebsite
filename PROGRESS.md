@@ -15,9 +15,9 @@ The project mirrors the architecture, stack, and conventions of the main FlashDe
 **Default UI language:** English.  
 **Versioning:** `v0.0x`.
 
-## Current Version: v0.02
+## Current Version: v0.03
 
-v0.02 adds the PostgreSQL + TypeORM data layer and a complete JWT authentication system (registration, login, token refresh, current user, logout). It also seeds an admin account and a set of indie-game project categories on startup.
+v0.03 adds the core forum and project APIs: full project CRUD with filters, forum categories/threads/posts with nested replies, likes, follows, and expanded seed data.
 
 ## Tech Stack
 
@@ -58,21 +58,22 @@ flashdevgameweb/
 
 ## Database Structure
 
-Implemented in v0.02:
+Implemented in v0.02–v0.03:
 
 - **users** — `id` (UUID PK), `email` (unique), `password_hash`, `avatar_url`, `display_name`, `email_verified`, `role` enum, `permissions` JSONB, `theme`, `created_at`, `updated_at`
 - **user_profiles** — `id` (UUID PK), `user_id` (unique FK), `bio`, `avatar_url`, `links` JSONB, `created_at`, `updated_at`
 - **project_categories** — `id` (UUID PK), `name`, `slug`, `display_order`, `created_at`
 - **projects** — `id` (UUID PK), `title`, `description`, `type` enum, `status` enum, `price`, `tags`, `thumbnail_url`, `demo_url`, `author_id` FK, `category_id` FK, `created_at`, `updated_at`
+- **forum_categories** — `id` (UUID PK), `name`, `slug`, `description`, `display_order`, `created_at`
+- **forum_threads** — `id` (UUID PK), `category_id` FK, `author_id` FK, `title`, `body`, `pinned`, `view_count`, `created_at`, `updated_at`
+- **forum_posts** — `id` (UUID PK), `thread_id` FK, `author_id` FK, `content`, `parent_id` FK, `depth`, `created_at`, `updated_at`
+- **likes** — `id` (UUID PK), `user_id` FK, `target_type` enum, `target_id`, `created_at`
+- **follows** — `id` (UUID PK), `follower_id` FK, `following_id` FK, `created_at`
 
 Planned for future versions:
 
-- **follows** — `id`, `follower_id` FK, `following_id` FK, `created_at`
 - **project_versions** — `id`, `project_id` FK, `version`, `changelog`, `download_url`
 - **project_files** — `id`, `project_id` FK, `version_id` FK, `file_url`, `file_type`
-- **forum_categories** — `id`, `name`, `slug`, `description`
-- **forum_threads** — `id`, `category_id` FK, `author_id` FK, `title`, `pinned`, `created_at`, `updated_at`
-- **forum_posts** — `id`, `thread_id` FK, `author_id` FK, `content`, `parent_id` FK (nested replies), `created_at`, `updated_at`
 - **market_listings** — `id`, `type` enum (sell/buy/promo/host), `project_id` FK (optional), `seller_id` FK, `title`, `description`, `price`, `status`, `created_at`, `updated_at`
 - **inquiries** — `id`, `listing_id` FK, `sender_id` FK, `message`, `created_at`
 
@@ -82,7 +83,7 @@ Planned for future versions:
 |---|---|---|---|
 | 1 | Project Scaffold & Dev Workflow | v0.01 | done |
 | 2 | Database & Authentication Foundation | v0.02 | done |
-| 3 | Forum & Project Core API | v0.03 | planned |
+| 3 | Forum & Project Core API | v0.03 | done |
 | 4 | Frontend Pages & API Integration | v0.04 | planned |
 | 5 | Marketplace Module | v0.05 | planned |
 | 6 | Media Uploads & Hosting | v0.06 | planned |
@@ -138,6 +139,38 @@ Planned for future versions:
   - `POST /api/auth/refresh` returns a new access token using the httpOnly cookie.
   - `POST /api/auth/logout` clears the refresh cookie.
   - Invalid login returns `401`.
+
+## Current Progress Detail (v0.03)
+
+### Completed
+- Implemented `ProjectsModule`:
+  - `GET /api/projects/categories`
+  - `GET /api/projects` with filters (type, status, categoryId, authorId, search) and pagination
+  - `GET /api/projects/:id`
+  - `POST /api/projects` (JWT required)
+  - `PATCH /api/projects/:id` (owner or admin/company)
+  - `DELETE /api/projects/:id` (owner or admin/company)
+- Added `CreateProjectDto`, `UpdateProjectDto`, and `ProjectQueryDto` with `class-validator` rules.
+- Implemented `ForumModule`:
+  - Entities: `ForumCategory`, `ForumThread`, `ForumPost` (with `parentId` and `depth` for nested replies).
+  - Endpoints for categories, thread list/detail, posts, nested replies, thread creation, posting, pinning, and deletion.
+- Implemented `LikesModule`: toggle/status/me endpoints for `PROJECT` and `FORUM_THREAD` targets.
+- Implemented `FollowsModule`: toggle/status/followers/following endpoints.
+- Expanded `SeedService` to create demo projects, forum categories, and a pinned welcome thread on startup.
+- Added `projects.service.spec.ts` Jest unit tests.
+- Updated `TypeOrmModule` entities and `AppModule` imports.
+
+### Verification (v0.03)
+- `bun install`, `bun run build:shared`, `bun run build:api`, `bun run build:web` all succeed.
+- `bun run --cwd apps/api test` passes (3 suites, 11 tests).
+- `bun run --cwd apps/web test` passes.
+- `docker compose up -d db` starts Postgres and the API connects with all new tables synchronized.
+- `curl` verification:
+  - Project categories/list/detail return seeded data.
+  - Authenticated project create/update works.
+  - Forum thread/post/reply creation works, with reply `depth` > 0.
+  - Liking a project returns `{ liked: true, count: 1 }` and status reflects it.
+  - Unauthorized project creation returns `401`.
 
 ## Project Goals
 
