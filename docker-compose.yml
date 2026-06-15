@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-flashdev}
+      POSTGRES_USER: ${DB_USER:-flashdev}
+      POSTGRES_PASSWORD: ${DB_PASS:-flashdev_secret}
+    ports:
+      - '5433:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-flashdev}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
