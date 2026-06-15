@@ -24,6 +24,16 @@ export interface User {
   updatedAt: string
 }
 
+export interface PublicUser {
+  id: string
+  email: string
+  role: UserRole
+  avatarUrl: string | null
+  displayName: string | null
+  emailVerified: boolean
+  createdAt: string
+}
+
 export interface AuthTokens {
   accessToken: string
   refreshToken: string

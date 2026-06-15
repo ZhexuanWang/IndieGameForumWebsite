@@ -40,7 +40,7 @@ export class ForumService {
     if (authorId) qb.andWhere('t.authorId = :authorId', { authorId })
 
     const [items, total] = await qb.getManyAndCount()
-    return { items, total, page, limit, pages: Math.ceil(total / limit) }
+    return { data: items, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
   async getThread(id: string) {
@@ -73,7 +73,7 @@ export class ForumService {
       .take(limit)
       .getManyAndCount()
 
-    return { items, total, page, limit, pages: Math.ceil(total / limit) }
+    return { data: items, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
   async getPostReplies(postId: string, page = 1, limit = 10) {
@@ -90,7 +90,7 @@ export class ForumService {
       .take(limit)
       .getManyAndCount()
 
-    return { items, total, page, limit, pages: Math.ceil(total / limit) }
+    return { data: items, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
   async createThread(authorId: string, dto: CreateThreadDto) {

@@ -84,7 +84,7 @@ Planned for future versions:
 | 1 | Project Scaffold & Dev Workflow | v0.01 | done |
 | 2 | Database & Authentication Foundation | v0.02 | done |
 | 3 | Forum & Project Core API | v0.03 | done |
-| 4 | Frontend Pages & API Integration | v0.04 | planned |
+| 4 | Frontend Pages & API Integration | v0.04 | done |
 | 5 | Marketplace Module | v0.05 | planned |
 | 6 | Media Uploads & Hosting | v0.06 | planned |
 | 7 | Search, Admin & Polish | v0.07 | planned |
@@ -171,6 +171,37 @@ Planned for future versions:
   - Forum thread/post/reply creation works, with reply `depth` > 0.
   - Liking a project returns `{ liked: true, count: 1 }` and status reflects it.
   - Unauthorized project creation returns `401`.
+
+## Current Progress Detail (v0.04)
+
+### Completed
+- Added shared types for forum, likes, follows, and public user profiles.
+- Added `lucide-react` icon library and expanded Tailwind component layer (cards, buttons, inputs, chips).
+- Implemented `AuthContext` with session restore, silent 401 refresh, and `ProtectedRoute` guard.
+- Added domain API wrappers: `auth.ts`, `projects.ts`, `forum.ts`, `likes.ts`, `follows.ts`, `users.ts`.
+- Built layout components (`Layout`, `Nav`, `Footer`) and reusable UI components (`Button`, `Card`, `Input`, `Select`, `Textarea`, `Pagination`, etc.).
+- Implemented frontend pages:
+  - Home, Login, Register, 404.
+  - Projects (list, detail, create, edit) with filtering and pagination.
+  - Forum (thread list, thread detail, create thread, nested replies).
+  - Profile (own and public) with follow counts.
+- Implemented `LikeButton` and `FollowButton` social components.
+- Added backend `UsersController` with `GET /api/users/:id` for public profiles.
+- Aligned paginated API responses (`projects`, `forum`) with the shared `PaginatedResponse<T>` shape (`data`, `totalPages`).
+- Fixed `cookie-parser` import for Bun/SWC compatibility.
+- Added Vitest unit tests for API domain modules and Playwright E2E tests for home, navigation, and auth flows.
+
+### Verification (v0.04)
+- `bun install` completes without errors.
+- `bun run build:shared`, `bun run build:api`, `bun run build:web` all succeed.
+- `bun run --cwd apps/api test` passes (3 suites, 11 tests).
+- `bun run --cwd apps/web test` passes (3 suites, 13 tests).
+- `bun run --cwd apps/web test:e2e` passes (home, navigation, auth register/login/logout).
+- Manual checks:
+  - Register/login/logout through the UI.
+  - Create/edit/delete project.
+  - Create thread and post nested replies.
+  - Like a project/thread and follow a user.
 
 ## Project Goals
 

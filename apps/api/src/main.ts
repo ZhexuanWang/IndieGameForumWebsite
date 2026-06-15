@@ -7,7 +7,7 @@ config({ path: resolve(__dirname, '../../../.env') })
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { ValidationPipe } from '@nestjs/common'
-import * as cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser'
 import { join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { AppModule } from './app.module'

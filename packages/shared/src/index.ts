@@ -1,3 +1,6 @@
 export * from './types/api'
 export * from './types/user'
 export * from './types/project'
+export * from './types/forum'
+export * from './types/like'
+export * from './types/follow'

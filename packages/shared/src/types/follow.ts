@@ -1,0 +1,15 @@
+export interface FollowStatus {
+  following: boolean
+}
+
+export interface FollowCounts {
+  following: number
+  followers: number
+}
+
+export interface Follow {
+  id: string
+  followerId: string
+  followingId: string
+  createdAt: string
+}

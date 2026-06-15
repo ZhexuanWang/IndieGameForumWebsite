@@ -55,7 +55,7 @@ describe('ProjectsService', () => {
 
   it('should return paginated projects', async () => {
     const result = await service.findAll({ page: 1, limit: 10 })
-    expect(result.items).toHaveLength(1)
+    expect(result.data).toHaveLength(1)
     expect(result.total).toBe(1)
   })
 
