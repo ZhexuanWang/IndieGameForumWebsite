@@ -15,9 +15,9 @@ The project mirrors the architecture, stack, and conventions of the main FlashDe
 **Default UI language:** English.  
 **Versioning:** `v0.0x`.
 
-## Current Version: v0.01
+## Current Version: v0.02
 
-v0.01 establishes the monorepo, containerized development environment, Git workflow, documentation, and a minimal runnable skeleton for the frontend and backend.
+v0.02 adds the PostgreSQL + TypeORM data layer and a complete JWT authentication system (registration, login, token refresh, current user, logout). It also seeds an admin account and a set of indie-game project categories on startup.
 
 ## Tech Stack
 
@@ -56,29 +56,32 @@ flashdevgameweb/
     └── reference/flashdev-spa/  # Original UI reference (read-only)
 ```
 
-## Database Structure (planned)
+## Database Structure
 
-The following entities will be implemented in v0.02 and beyond using TypeORM with PostgreSQL:
+Implemented in v0.02:
 
-- **users** — `id` (UUID PK), `email` (unique), `passwordHash`, `role` enum, `permissions` JSONB, `createdAt`, `updatedAt`
-- **user_profiles** — `id`, `userId` FK, `bio`, `avatarUrl`, `socialLinks` JSONB
-- **follows** — `id`, `followerId` FK, `followingId` FK, `createdAt`
-- **project_categories** — `id`, `name`, `slug`, `displayOrder`
-- **projects** — `id`, `title`, `description`, `type` enum, `status` enum, `price`, `tags`, `thumbnailUrl`, `demoUrl`, `authorId` FK, `categoryId` FK, `createdAt`, `updatedAt`
-- **project_versions** — `id`, `projectId` FK, `version`, `changelog`, `downloadUrl`
-- **project_files** — `id`, `projectId` FK, `versionId` FK, `fileUrl`, `fileType`
+- **users** — `id` (UUID PK), `email` (unique), `password_hash`, `avatar_url`, `display_name`, `email_verified`, `role` enum, `permissions` JSONB, `theme`, `created_at`, `updated_at`
+- **user_profiles** — `id` (UUID PK), `user_id` (unique FK), `bio`, `avatar_url`, `links` JSONB, `created_at`, `updated_at`
+- **project_categories** — `id` (UUID PK), `name`, `slug`, `display_order`, `created_at`
+- **projects** — `id` (UUID PK), `title`, `description`, `type` enum, `status` enum, `price`, `tags`, `thumbnail_url`, `demo_url`, `author_id` FK, `category_id` FK, `created_at`, `updated_at`
+
+Planned for future versions:
+
+- **follows** — `id`, `follower_id` FK, `following_id` FK, `created_at`
+- **project_versions** — `id`, `project_id` FK, `version`, `changelog`, `download_url`
+- **project_files** — `id`, `project_id` FK, `version_id` FK, `file_url`, `file_type`
 - **forum_categories** — `id`, `name`, `slug`, `description`
-- **forum_threads** — `id`, `categoryId` FK, `authorId` FK, `title`, `pinned`, `createdAt`, `updatedAt`
-- **forum_posts** — `id`, `threadId` FK, `authorId` FK, `content`, `parentId` FK (nested replies), `createdAt`, `updatedAt`
-- **market_listings** — `id`, `type` enum (sell/buy/promo/host), `projectId` FK (optional), `sellerId` FK, `title`, `description`, `price`, `status`, `createdAt`, `updatedAt`
-- **inquiries** — `id`, `listingId` FK, `senderId` FK, `message`, `createdAt`
+- **forum_threads** — `id`, `category_id` FK, `author_id` FK, `title`, `pinned`, `created_at`, `updated_at`
+- **forum_posts** — `id`, `thread_id` FK, `author_id` FK, `content`, `parent_id` FK (nested replies), `created_at`, `updated_at`
+- **market_listings** — `id`, `type` enum (sell/buy/promo/host), `project_id` FK (optional), `seller_id` FK, `title`, `description`, `price`, `status`, `created_at`, `updated_at`
+- **inquiries** — `id`, `listing_id` FK, `sender_id` FK, `message`, `created_at`
 
 ## Phase Plan
 
 | Phase | Name | Version | Status |
 |---|---|---|---|
 | 1 | Project Scaffold & Dev Workflow | v0.01 | done |
-| 2 | Database & Authentication Foundation | v0.02 | planned |
+| 2 | Database & Authentication Foundation | v0.02 | done |
 | 3 | Forum & Project Core API | v0.03 | planned |
 | 4 | Frontend Pages & API Integration | v0.04 | planned |
 | 5 | Marketplace Module | v0.05 | planned |
@@ -104,6 +107,37 @@ The following entities will be implemented in v0.02 and beyond using TypeORM wit
 - `bun run --cwd apps/web test` runs Vitest placeholder tests.
 - `docker compose up -d db` starts Postgres healthy.
 - `curl http://localhost:3001/api/health` returns a JSON response.
+
+## Current Progress Detail (v0.02)
+
+### Completed
+- Added TypeORM configuration in `apps/api/src/config/typeorm.config.ts` connected to PostgreSQL 16.
+- Implemented core entities: `User`, `UserProfile`, `ProjectCategory`, `Project`.
+- Implemented `UsersModule`, `ProjectsModule`, `SeedModule`.
+- Implemented `AuthModule` with endpoints:
+  - `POST /api/auth/register`
+  - `POST /api/auth/login`
+  - `POST /api/auth/refresh`
+  - `GET /api/auth/me`
+  - `POST /api/auth/logout`
+- Implemented JWT strategies and guards: `JwtAuthGuard`, `JwtRefreshGuard`, `RolesGuard`, `@CurrentUser()`, `@Roles()`.
+- Configured JWT access token in response body + httpOnly refresh cookie (`refresh_token`).
+- Added `SeedService` that idempotently seeds an admin account and 7 game categories on startup.
+- Added `auth.service.spec.ts` unit tests.
+- Updated `.env.example` with `ADMIN_EMAIL` / `ADMIN_PASSWORD` seed variables.
+
+### Verification (v0.02)
+- `bun install`, `bun run build:shared`, `bun run build:api`, `bun run build:web` all succeed.
+- `bun run --cwd apps/api test` passes (health + auth service tests).
+- `bun run --cwd apps/web test` passes.
+- `docker compose up -d db` starts Postgres on port `5433` and API connects successfully.
+- `curl` verification:
+  - `POST /api/auth/register` returns user + access token and sets refresh cookie.
+  - `POST /api/auth/login` returns user + access token for valid credentials.
+  - `GET /api/auth/me` returns current user when authenticated and `401` when not.
+  - `POST /api/auth/refresh` returns a new access token using the httpOnly cookie.
+  - `POST /api/auth/logout` clears the refresh cookie.
+  - Invalid login returns `401`.
 
 ## Project Goals
 
