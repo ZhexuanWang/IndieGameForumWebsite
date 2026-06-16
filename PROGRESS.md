@@ -299,6 +299,11 @@ Planned for future versions:
   - Restyled `Footer.tsx` to match the reference multi-column footer.
   - Restyled `HomePage.tsx` to match the reference launcher hero: kicker badge, large title, feature cards, and stats bar.
   - Updated E2E home/auth assertions to match the new hero title.
+- **Theme switcher:** implemented the Cyberpunk and Dreamy Future themes from `flashdev-spa.html`:
+  - Created a CSS-variable-driven design system in `tailwind.config.ts` and `index.css` so all utility classes adapt to the active theme.
+  - Added `apps/web/src/lib/theme.ts`, `ThemeContext.tsx`, and `ThemePicker.tsx` with localStorage persistence and cross-tab sync.
+  - Added an inline script in `index.html` to apply the stored theme before first paint, avoiding flash.
+  - Inserted the `ThemePicker` dropdown into the desktop navigation bar.
 
 ### Verification (v0.07)
 - `bun install` completes without errors.

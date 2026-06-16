@@ -6,30 +6,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        void: '#0c0a14',
-        deep: '#130f1c',
+        void: 'rgb(var(--void) / <alpha-value>)',
+        deep: 'rgb(var(--bg) / <alpha-value>)',
         surface: {
-          0: '#130f1c',
-          1: '#1c1828',
-          2: '#252236',
-          3: '#2c283f',
+          0: 'rgb(var(--surface-0) / <alpha-value>)',
+          1: 'rgb(var(--surface-1) / <alpha-value>)',
+          2: 'rgb(var(--surface-2) / <alpha-value>)',
+          3: 'rgb(var(--surface-3) / <alpha-value>)',
         },
         brand: {
-          cyan: '#f97316',
-          violet: '#3b82f6',
-          teal: '#22c55e',
-          amber: '#f59e0b',
-          rose: '#dc2626',
-          orange: '#ea580c',
+          cyan: 'rgb(var(--accent) / <alpha-value>)',
+          violet: 'rgb(var(--info) / <alpha-value>)',
+          teal: 'rgb(var(--success) / <alpha-value>)',
+          amber: 'rgb(var(--warn) / <alpha-value>)',
+          rose: 'rgb(var(--danger) / <alpha-value>)',
+          orange: 'rgb(var(--accent-2) / <alpha-value>)',
         },
         ink: {
-          DEFAULT: '#f1f1f4',
-          dim: '#a7a3b5',
-          muted: '#6f6b82',
+          DEFAULT: 'rgb(var(--fg) / <alpha-value>)',
+          dim: 'rgb(var(--dim) / <alpha-value>)',
+          muted: 'rgb(var(--muted) / <alpha-value>)',
         },
         edge: {
-          DEFAULT: '#282536',
-          strong: '#363247',
+          DEFAULT: 'rgb(var(--border) / <alpha-value>)',
+          strong: 'rgb(var(--border-strong) / <alpha-value>)',
         },
       },
       fontFamily: {
@@ -46,10 +46,10 @@ export default {
         pill: '999px',
       },
       boxShadow: {
-        glow: '0 0 24px rgba(249, 115, 22, 0.22)',
-        'glow-lg': '0 0 40px rgba(249, 115, 22, 0.35)',
-        card: '0 4px 12px rgba(0, 0, 0, 0.35)',
-        'card-lg': '0 12px 40px rgba(0, 0, 0, 0.45)',
+        glow: '0 0 24px rgb(var(--accent) / 0.22)',
+        'glow-lg': '0 0 40px rgb(var(--accent) / 0.35)',
+        card: '0 4px 12px rgb(0 0 0 / 0.35)',
+        'card-lg': '0 12px 40px rgb(0 0 0 / 0.45)',
       },
       animation: {
         'fade-up': 'fadeUp 700ms cubic-bezier(.2,.8,.2,1) both',

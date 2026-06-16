@@ -11,6 +11,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
+import { ThemePicker } from '@/components/ui/ThemePicker'
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -39,7 +40,7 @@ export function Nav() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 h-[60px] border-b border-edge bg-deep/85 backdrop-blur-[16px]">
+    <header className="site-nav sticky top-0 z-50 h-[60px] border-b border-edge bg-deep/85 backdrop-blur-[16px]">
       <nav className="mx-auto flex h-full max-w-7xl items-center justify-between px-5 sm:px-6">
         <NavLink to="/" className="flex items-center gap-3 text-ink">
           <Gamepad2 className="h-7 w-7 text-brand-cyan" />
@@ -77,6 +78,7 @@ export function Nav() {
         </form>
 
         <div className="hidden items-center gap-3 md:flex">
+          <ThemePicker />
           {user ? (
             <>
               <Button variant="primary" size="sm" to="/projects/new">
