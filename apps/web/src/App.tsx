@@ -16,6 +16,8 @@ import { ListingDetailPage } from '@/pages/ListingDetailPage'
 import { CreateListingPage } from '@/pages/CreateListingPage'
 import { EditListingPage } from '@/pages/EditListingPage'
 import { MyInquiriesPage } from '@/pages/MyInquiriesPage'
+import { SearchPage } from '@/pages/SearchPage'
+import { AdminPage } from '@/pages/AdminPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 function App() {
@@ -84,6 +86,15 @@ function App() {
         element={
           <ProtectedRoute>
             <MyInquiriesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/search" element={<SearchPage />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={['admin', 'company']}>
+            <AdminPage />
           </ProtectedRoute>
         }
       />

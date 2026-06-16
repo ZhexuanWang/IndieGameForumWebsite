@@ -11,6 +11,8 @@ import { LikesModule } from './likes/likes.module'
 import { FollowsModule } from './follows/follows.module'
 import { MarketplaceModule } from './marketplace/marketplace.module'
 import { UploadsModule } from './uploads/uploads.module'
+import { SearchModule } from './search/search.module'
+import { AdminModule } from './admin/admin.module'
 import { SeedModule } from './seed/seed.module'
 
 @Module({
@@ -26,6 +28,8 @@ import { SeedModule } from './seed/seed.module'
     FollowsModule,
     MarketplaceModule,
     UploadsModule,
+    SearchModule,
+    AdminModule,
     SeedModule,
   ],
 })

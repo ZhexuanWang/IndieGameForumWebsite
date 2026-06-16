@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Upload, X, File as FileIcon } from 'lucide-react'
 import { uploadsApi, type UploadResult } from '@/lib/uploads'
+import { useToast } from '@/contexts/ToastContext'
 import { Button } from './Button'
 import { LoadingSpinner } from './LoadingSpinner'
 
@@ -37,6 +38,7 @@ export function FileInput({
 }: FileInputProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const { showToast } = useToast()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,11 +49,13 @@ export function FileInput({
     try {
       const result = await uploadsApi.upload(file)
       onUpload(result)
+      showToast('File uploaded', 'success')
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message || 'Upload failed'
       setUploadError(message)
+      showToast(message, 'error')
     } finally {
       setIsUploading(false)
       if (inputRef.current) inputRef.current.value = ''

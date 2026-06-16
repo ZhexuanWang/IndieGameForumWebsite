@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import type { Project, ProjectCategory } from '@flashdev/gameweb-shared'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/ToastContext'
 import { projectsApi } from '@/lib/projects'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -43,6 +44,7 @@ export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [project, setProject] = useState<Project | null>(null)
   const [category, setCategory] = useState<ProjectCategory | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -80,9 +82,11 @@ export function ProjectDetailPage() {
     if (!project || !window.confirm('Delete this project?')) return
     try {
       await projectsApi.remove(project.id)
+      showToast('Project deleted', 'success')
       navigate('/projects')
     } catch {
       setError('Failed to delete project')
+      showToast('Failed to delete project', 'error')
     }
   }
 

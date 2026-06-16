@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Repository, ILike } from 'typeorm'
 import { User } from './entities/user.entity'
 import type { UserRole, UserPermissions } from '@flashdev/gameweb-shared'
 
@@ -50,5 +50,30 @@ export class UsersService {
 
   async update(id: string, data: Partial<Pick<User, 'avatarUrl' | 'displayName' | 'emailVerified'>>): Promise<void> {
     await this.repo.update(id, data)
+  }
+
+  async findAll(query: { page?: number; limit?: number; search?: string }) {
+    const page = query.page ?? 1
+    const limit = query.limit ?? 20
+    const where = query.search
+      ? [
+          { displayName: ILike(`%${query.search}%`) },
+          { email: ILike(`%${query.search}%`) },
+        ]
+      : undefined
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    })
+
+    return { data, total, page, limit, totalPages: Math.ceil(total / limit) }
+  }
+
+  async updateRole(id: string, role: UserRole): Promise<void> {
+    const result = await this.repo.update(id, { role })
+    if (result.affected === 0) throw new NotFoundException('User not found')
   }
 }

@@ -15,9 +15,9 @@ The project mirrors the architecture, stack, and conventions of the main FlashDe
 **Default UI language:** English.  
 **Versioning:** `v0.0x`.
 
-## Current Version: v0.06
+## Current Version: v0.07
 
-v0.06 adds Media Uploads & Hosting: a local-disk upload service for project thumbnails and downloadable files, plus project file management so developers can distribute builds, source archives, and demos directly from a project page.
+v0.07 adds Global Search, Admin User Management, and UI Polish: a unified search page for projects, forum threads, and marketplace listings; an admin panel for listing users and updating roles; and toast notifications for key user actions.
 
 ## Tech Stack
 
@@ -88,8 +88,7 @@ Planned for future versions:
 | 4 | Frontend Pages & API Integration | v0.04 | done |
 | 5 | Marketplace Module | v0.05 | done |
 | 6 | Media Uploads & Hosting | v0.06 | done |
-| 7 | Search, Admin & Polish | v0.07 | planned |
-| 7 | Search, Admin & Polish | v0.07 | planned |
+| 7 | Search, Admin & Polish | v0.07 | done |
 
 ## Current Progress Detail (v0.01)
 
@@ -268,6 +267,41 @@ Planned for future versions:
   - Create a project with an uploaded thumbnail; detail page displays the image.
   - Edit the project to upload a ZIP file; detail page shows Downloads with the file.
   - Delete the project; associated files are removed from `uploads/`.
+
+## Current Progress Detail (v0.07)
+
+### Completed
+- Added shared search types in `packages/shared` (`SearchResult`, `SearchResultItem`, `SearchTarget`, `SearchResponse`).
+- Implemented backend `SearchModule`:
+  - `SearchService` with a single query across projects, forum threads, and marketplace listings using case-insensitive matching on title, description, tags, and content.
+  - Paginated `GET /api/search?q=&page=&limit=` endpoint returning unified results with target type and link hints.
+  - Added `search.service.spec.ts` unit tests.
+- Implemented backend `AdminModule`:
+  - `GET /api/admin/users` with pagination, search, and role filtering (admin/company/user) restricted to admin users.
+  - `PATCH /api/admin/users/:id/role` to update a user's role, protected by `RolesGuard`.
+  - Added `admin.service.spec.ts` unit tests.
+- Frontend search integration:
+  - Added `search.ts` API wrapper and `SearchPage` with scoped filter tabs (All / Projects / Forum / Marketplace) and result cards.
+  - Added a search input to `Nav.tsx` and registered `/search` route in `App.tsx`.
+  - Added `search.test.ts` Vitest module test.
+- Frontend admin integration:
+  - Added `admin.ts` API wrapper and `AdminPage` with paginated user table, search, and role dropdown.
+  - Added an Admin link in `Nav.tsx` visible only to admin users.
+  - Added `admin.spec.ts` Vitest module test.
+- Added a `ToastContext`/`ToastProvider` with `useToast` hook and fixed provider ordering in `main.tsx` so `AuthProvider` can trigger toasts.
+- Wired toast notifications to login, register, logout, project create/update/delete, marketplace listing create/update/delete, inquiry send, and admin role changes.
+- Added a Playwright E2E test for the search flow (`tests/search.spec.ts`) that creates a project and verifies keyword search returns results.
+
+### Verification (v0.07)
+- `bun install` completes without errors.
+- `bun run build:shared`, `bun run build:api`, `bun run build:web` all succeed.
+- `bun run --cwd apps/api test` passes (7 suites, 29 tests).
+- `bun run --cwd apps/web test` passes (7 suites, 21 tests).
+- `bun run --cwd apps/web test:e2e` passes (home, navigation, auth, marketplace, project upload, and search flows).
+- Manual checks:
+  - Global search finds projects by keyword and switches scope tabs correctly.
+  - Admin page lists users and updates a user's role.
+  - Toast notifications appear after login, project creation, and role updates.
 
 ## Project Goals
 

@@ -8,6 +8,7 @@ import {
 } from 'react'
 import axios from 'axios'
 import { api, clearToken, hasToken, storeToken } from '@/lib/api'
+import { useToast } from '@/contexts/ToastContext'
 import type { LoginDto, RegisterDto, User } from '@flashdev/gameweb-shared'
 
 interface AuthContextValue {
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const { showToast } = useToast()
   const isRefreshingRef = useRef(false)
   const queueRef = useRef<
     Array<{
@@ -136,8 +138,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       storeToken(res.data.accessToken)
       api.defaults.headers.common.Authorization = `Bearer ${res.data.accessToken}`
       setUser(res.data.user)
+      showToast('Welcome back!', 'success')
     },
-    [],
+    [showToast],
   )
 
   const register = useCallback(
@@ -149,17 +152,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       storeToken(res.data.accessToken)
       api.defaults.headers.common.Authorization = `Bearer ${res.data.accessToken}`
       setUser(res.data.user)
+      showToast('Account created', 'success')
     },
-    [],
+    [showToast],
   )
 
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout')
+      showToast('Logged out', 'info')
     } finally {
       clearSession()
     }
-  }, [clearSession])
+  }, [clearSession, showToast])
 
   return (
     <AuthContext.Provider

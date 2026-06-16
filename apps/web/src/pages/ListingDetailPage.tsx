@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, MessageSquare, Pencil, Trash2 } from 'lucide-react'
 import type { Inquiry, MarketListing } from '@flashdev/gameweb-shared'
 import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/ToastContext'
 import { marketplaceApi } from '@/lib/marketplace'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -37,6 +38,7 @@ export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [listing, setListing] = useState<MarketListing | null>(null)
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [message, setMessage] = useState('')
@@ -100,6 +102,7 @@ export function ListingDetailPage() {
     try {
       await marketplaceApi.createInquiry(id, { message })
       setMessage('')
+      showToast('Inquiry sent', 'success')
       loadListing()
     } catch (err: unknown) {
       const msg =
@@ -115,9 +118,11 @@ export function ListingDetailPage() {
     if (!listing || !window.confirm('Delete this listing?')) return
     try {
       await marketplaceApi.deleteListing(listing.id)
+      showToast('Listing deleted', 'success')
       navigate('/marketplace')
     } catch {
       setError('Failed to delete listing')
+      showToast('Failed to delete listing', 'error')
     }
   }
 

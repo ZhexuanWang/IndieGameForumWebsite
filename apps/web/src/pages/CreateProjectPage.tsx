@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import type { CreateProjectDto } from '@/lib/projects'
 import { ProjectForm } from '@/components/projects/ProjectForm'
 import { projectsApi } from '@/lib/projects'
+import { useToast } from '@/contexts/ToastContext'
 import { Layout } from '@/components/layout/Layout'
 
 export function CreateProjectPage() {
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -15,6 +17,7 @@ export function CreateProjectPage() {
     setError('')
     try {
       const project = await projectsApi.create(values as unknown as CreateProjectDto)
+      showToast('Project created', 'success')
       navigate(`/projects/${project.id}`)
     } catch (err: unknown) {
       const message =

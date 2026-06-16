@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Gamepad2, Menu, X, User, LogOut, Plus } from 'lucide-react'
+import { Gamepad2, Menu, X, User, LogOut, Plus, Search, Shield } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
@@ -10,6 +10,7 @@ export function Nav() {
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   const handleLogout = async () => {
     await logout()
@@ -41,6 +42,26 @@ export function Nav() {
             </Link>
           ))}
         </div>
+
+        <form
+          onSubmit={e => {
+            e.preventDefault()
+            const q = search.trim()
+            if (q) navigate(`/search?q=${encodeURIComponent(q)}`)
+          }}
+          className="hidden items-center md:flex"
+        >
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+            <input
+              type="search"
+              placeholder="Search..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="input h-9 rounded-lg bg-surface-0 py-1.5 pl-8 pr-3 text-sm"
+            />
+          </div>
+        </form>
 
         <div className="hidden items-center gap-3 md:flex">
           {user ? (
@@ -74,6 +95,16 @@ export function Nav() {
                       <User className="h-4 w-4" />
                       Profile
                     </Link>
+                    {(user.role === 'admin' || user.role === 'company') && (
+                      <Link
+                        to="/admin"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-ink-dim hover:bg-surface-2 hover:text-ink"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <Shield className="h-4 w-4" />
+                        Admin
+                      </Link>
+                    )}
                     <button
                       data-testid="logout-button"
                       onClick={handleLogout}
@@ -109,6 +140,32 @@ export function Nav() {
       {mobileOpen && (
         <div className="border-t border-edge bg-surface-0 px-4 py-4 md:hidden">
           <div className="flex flex-col gap-3">
+            <form
+              onSubmit={e => {
+                e.preventDefault()
+                const q = search.trim()
+                if (q) {
+                  navigate(`/search?q=${encodeURIComponent(q)}`)
+                  setMobileOpen(false)
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                type="search"
+                placeholder="Search..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="input flex-1 rounded-lg bg-surface-1 px-3 py-2 text-sm"
+              />
+              <button
+                type="submit"
+                className="btn btn-secondary px-3"
+                disabled={!search.trim()}
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
             {navLinks.map(link => (
               <Link
                 key={link.to}
@@ -128,6 +185,15 @@ export function Nav() {
                 >
                   Profile
                 </Link>
+                {(user.role === 'admin' || user.role === 'company') && (
+                  <Link
+                    to="/admin"
+                    className="text-sm font-medium text-ink-dim hover:text-ink"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="text-left text-sm font-medium text-brand-rose"

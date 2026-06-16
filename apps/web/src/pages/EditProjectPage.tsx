@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Project } from '@flashdev/gameweb-shared'
 import { useAuth } from '@/contexts/AuthContext'
 import { projectsApi } from '@/lib/projects'
+import { useToast } from '@/contexts/ToastContext'
 import { ProjectForm } from '@/components/projects/ProjectForm'
 import { ProjectFilesManager } from '@/components/projects/ProjectFilesManager'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -13,6 +14,7 @@ export function EditProjectPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [project, setProject] = useState<Project | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -49,6 +51,7 @@ export function EditProjectPage() {
     setError('')
     try {
       await projectsApi.update(id, values as Parameters<typeof projectsApi.update>[1])
+      showToast('Project updated', 'success')
       navigate(`/projects/${id}`)
     } catch (err: unknown) {
       const message =
