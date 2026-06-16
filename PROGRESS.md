@@ -304,6 +304,10 @@ Planned for future versions:
   - Added `apps/web/src/lib/theme.ts`, `ThemeContext.tsx`, and `ThemePicker.tsx` with localStorage persistence and cross-tab sync.
   - Added an inline script in `index.html` to apply the stored theme before first paint, avoiding flash.
   - Inserted the `ThemePicker` dropdown into the desktop navigation bar.
+- **Dynamic background & cursor glow:** added theme-aware Canvas background and mouse-following glow matching `flashdev-spa.html`:
+  - `DynamicBackground.tsx` renders a fixed `<canvas>` behind content with particle systems, mouse repel/attract, connection lines, click ripples, and theme-specific palettes/scenery for all three themes (FlashDev cosmic, Cyberpunk grid/neon, Dreamy Future gradients).
+  - `CursorGlow.tsx` adds a lagging radial glow that follows the cursor on non-touch devices, switching gradient per theme.
+  - Both components are mounted in `Layout.tsx` and read the active theme from `ThemeContext`.
 
 ### Verification (v0.07)
 - `bun install` completes without errors.
