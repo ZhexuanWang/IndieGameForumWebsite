@@ -75,3 +75,35 @@ export const createPostSchema = z.object({
 })
 
 export type CreatePostSchema = z.infer<typeof createPostSchema>
+
+const listingTypeEnum = z.enum(['sell', 'buy', 'promo', 'host'])
+const listingStatusEnum = z.enum(['draft', 'published', 'closed'])
+
+export const createListingSchema = z.object({
+  title: z
+    .string()
+    .min(3, 'Title must be at least 3 characters')
+    .max(200, 'Title must be under 200 characters'),
+  description: z
+    .string()
+    .min(10, 'Description must be at least 10 characters'),
+  type: listingTypeEnum,
+  price: z.number().min(0).optional(),
+  projectId: z.string().uuid().optional().or(z.literal('')),
+  status: listingStatusEnum.optional(),
+})
+
+export type CreateListingSchema = z.infer<typeof createListingSchema>
+
+export const updateListingSchema = createListingSchema.partial()
+
+export type UpdateListingSchema = z.infer<typeof updateListingSchema>
+
+export const createInquirySchema = z.object({
+  message: z
+    .string()
+    .min(2, 'Message must be at least 2 characters')
+    .max(5000, 'Message must be under 5000 characters'),
+})
+
+export type CreateInquirySchema = z.infer<typeof createInquirySchema>

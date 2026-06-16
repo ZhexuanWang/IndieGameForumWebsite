@@ -19,6 +19,7 @@ export function Nav() {
   const navLinks = [
     { to: '/projects', label: 'Projects' },
     { to: '/forum', label: 'Forum' },
+    { to: '/marketplace', label: 'Marketplace' },
   ]
 
   return (

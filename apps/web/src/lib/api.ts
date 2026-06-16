@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+const BASE = import.meta.env.VITE_API_URL || '/api'
 export const TOKEN_KEY = 'flashdev.access_token'
 
 export const api = axios.create({

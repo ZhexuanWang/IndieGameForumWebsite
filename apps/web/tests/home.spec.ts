@@ -6,4 +6,5 @@ test('landing page renders and shows navigation', async ({ page }) => {
   await expect(page.locator('text=API Status')).toBeVisible()
   await expect(page.locator('nav')).toContainText('Projects')
   await expect(page.locator('nav')).toContainText('Forum')
+  await expect(page.locator('nav')).toContainText('Marketplace')
 })

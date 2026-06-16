@@ -8,6 +8,8 @@ import { Project } from '../projects/entities/project.entity'
 import { ForumCategory } from '../forum/entities/forum-category.entity'
 import { ForumThread } from '../forum/entities/forum-thread.entity'
 import { ForumPost } from '../forum/entities/forum-post.entity'
+import { MarketListing } from '../marketplace/entities/market-listing.entity'
+import { Inquiry } from '../marketplace/entities/inquiry.entity'
 
 const SEED_PROJECT_CATEGORIES = [
   { name: 'Action', slug: 'action', displayOrder: 1 },
@@ -43,6 +45,10 @@ export class SeedService implements OnModuleInit {
     private readonly threadRepo: Repository<ForumThread>,
     @InjectRepository(ForumPost)
     private readonly postRepo: Repository<ForumPost>,
+    @InjectRepository(MarketListing)
+    private readonly listingRepo: Repository<MarketListing>,
+    @InjectRepository(Inquiry)
+    private readonly inquiryRepo: Repository<Inquiry>,
   ) {}
 
   async onModuleInit() {
@@ -51,6 +57,7 @@ export class SeedService implements OnModuleInit {
     await this.seedForumCategories()
     await this.seedDemoProjects()
     await this.seedDemoThreads()
+    await this.seedMarketplaceListings()
   }
 
   private async seedAdminAccount() {
@@ -158,5 +165,53 @@ export class SeedService implements OnModuleInit {
     })
     await this.postRepo.save(post)
     this.logger.log('Demo forum thread seeded')
+  }
+
+  private async seedMarketplaceListings() {
+    const count = await this.listingRepo.count()
+    if (count > 0) return
+
+    const admin = await this.usersService.findByEmail(
+      process.env.ADMIN_EMAIL || 'admin@flashdev.io',
+    )
+    if (!admin) return
+
+    const projects = await this.projectRepo.find({ take: 2 })
+
+    const listings = [
+      {
+        title: 'Neon Drifter — Full Source Code',
+        description:
+          'Sell the complete Godot source code, assets, and publishing rights for Neon Drifter.',
+        type: 'sell' as const,
+        status: 'published' as const,
+        price: 499,
+      },
+      {
+        title: 'Indie Game Hosting Bundle',
+        description:
+          'Affordable hosting for demo builds and multiplayer lobby servers.',
+        type: 'host' as const,
+        status: 'published' as const,
+        price: 19.99,
+      },
+      {
+        title: 'Pixel Art Collaboration Wanted',
+        description:
+          'Looking for a pixel artist to join a roguelike project. Revenue share.',
+        type: 'promo' as const,
+        status: 'published' as const,
+      },
+    ]
+
+    for (let i = 0; i < listings.length; i++) {
+      const listing = this.listingRepo.create({
+        ...listings[i],
+        sellerId: admin.id,
+        projectId: projects[i % projects.length]?.id ?? null,
+      })
+      await this.listingRepo.save(listing)
+      this.logger.log(`Demo marketplace listing seeded -> ${listing.title}`)
+    }
   }
 }

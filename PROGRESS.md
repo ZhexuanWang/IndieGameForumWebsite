@@ -15,9 +15,9 @@ The project mirrors the architecture, stack, and conventions of the main FlashDe
 **Default UI language:** English.  
 **Versioning:** `v0.0x`.
 
-## Current Version: v0.03
+## Current Version: v0.05
 
-v0.03 adds the core forum and project APIs: full project CRUD with filters, forum categories/threads/posts with nested replies, likes, follows, and expanded seed data.
+v0.05 adds the Marketplace Module: listings for selling, buying, promoting, and hosting indie games or services, plus an inquiry system so buyers and sellers can connect without handling payments in-app.
 
 ## Tech Stack
 
@@ -69,13 +69,13 @@ Implemented in v0.02–v0.03:
 - **forum_posts** — `id` (UUID PK), `thread_id` FK, `author_id` FK, `content`, `parent_id` FK, `depth`, `created_at`, `updated_at`
 - **likes** — `id` (UUID PK), `user_id` FK, `target_type` enum, `target_id`, `created_at`
 - **follows** — `id` (UUID PK), `follower_id` FK, `following_id` FK, `created_at`
+- **market_listings** — `id` (UUID PK), `type` enum (`sell`/`buy`/`promo`/`host`), `project_id` FK (optional), `seller_id` FK, `title`, `description`, `price`, `status` enum (`draft`/`published`/`closed`), `created_at`, `updated_at`
+- **inquiries** — `id` (UUID PK), `listing_id` FK, `sender_id` FK, `message`, `status` enum (`pending`/`replied`/`closed`), `created_at`, `updated_at`
 
 Planned for future versions:
 
 - **project_versions** — `id`, `project_id` FK, `version`, `changelog`, `download_url`
 - **project_files** — `id`, `project_id` FK, `version_id` FK, `file_url`, `file_type`
-- **market_listings** — `id`, `type` enum (sell/buy/promo/host), `project_id` FK (optional), `seller_id` FK, `title`, `description`, `price`, `status`, `created_at`, `updated_at`
-- **inquiries** — `id`, `listing_id` FK, `sender_id` FK, `message`, `created_at`
 
 ## Phase Plan
 
@@ -85,7 +85,7 @@ Planned for future versions:
 | 2 | Database & Authentication Foundation | v0.02 | done |
 | 3 | Forum & Project Core API | v0.03 | done |
 | 4 | Frontend Pages & API Integration | v0.04 | done |
-| 5 | Marketplace Module | v0.05 | planned |
+| 5 | Marketplace Module | v0.05 | done |
 | 6 | Media Uploads & Hosting | v0.06 | planned |
 | 7 | Search, Admin & Polish | v0.07 | planned |
 
@@ -202,6 +202,39 @@ Planned for future versions:
   - Create/edit/delete project.
   - Create thread and post nested replies.
   - Like a project/thread and follow a user.
+
+## Current Progress Detail (v0.05)
+
+### Completed
+- Added shared marketplace types: `MarketListing`, `Inquiry`, enums for listing type/status and inquiry status.
+- Implemented backend `MarketplaceModule`:
+  - Entities `MarketListing` and `Inquiry` with optional `Project` relation and seller/sender authorization.
+  - DTOs for creating/updating listings, querying listings, and creating/updating inquiries.
+  - `MarketplaceService` with paginated listing search, listing detail with inquiry count, owner/admin/company edit/delete guards, and inquiry lifecycle management.
+  - `MarketplaceController` with endpoints under `/api/marketplace` for listings and inquiries.
+- Registered marketplace entities in `typeorm.config.ts`, imported `MarketplaceModule` in `AppModule`, and expanded `SeedService` with demo marketplace listings.
+- Added frontend marketplace support:
+  - Domain API wrapper and Zod validation schemas in `apps/web/src/lib/marketplace.ts` and `validation.ts`.
+  - Pages: Marketplace list, Listing detail, Create listing, Edit listing, My Inquiries.
+  - Components: `ListingCard`, `InquiryRow`.
+  - Updated `App.tsx` routes and `Nav.tsx` with a Marketplace link.
+- Added API unit tests for `MarketplaceService` and a Vitest validation test for listing/inquiry schemas.
+- Added Playwright E2E test covering listing creation by a seller and inquiry submission by a second buyer, plus navigation assertions for the Marketplace link.
+- Fixed a circular entity dependency between `MarketListing` and `Inquiry` by replacing the bidirectional relation with a manual inquiry count query.
+- Updated the frontend API client default base URL to `/api` so dev and E2E requests use the Vite proxy and avoid cross-origin issues.
+- Configured Playwright `webServer` as an ordered array (API health check first, then Vite dev server) for reliable E2E startup.
+
+### Verification (v0.05)
+- `bun install` completes without errors.
+- `bun run build:shared`, `bun run build:api`, `bun run build:web` all succeed.
+- `bun run --cwd apps/api test` passes (4 suites, 19 tests).
+- `bun run --cwd apps/web test` passes (4 suites, 18 tests).
+- `bun run --cwd apps/web test:e2e` passes (home, navigation, auth, and marketplace listing/inquiry flow).
+- Manual checks:
+  - Create a marketplace listing as a seller.
+  - View listing detail with seller info, price, and inquiry count.
+  - Send an inquiry as another user and view it under My Inquiries.
+  - Seller can update inquiry status and edit/delete their own listings.
 
 ## Project Goals
 

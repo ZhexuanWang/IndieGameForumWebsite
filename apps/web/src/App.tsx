@@ -11,6 +11,11 @@ import { ForumPage } from '@/pages/ForumPage'
 import { ForumThreadPage } from '@/pages/ForumThreadPage'
 import { CreateThreadPage } from '@/pages/CreateThreadPage'
 import { ProfilePage } from '@/pages/ProfilePage'
+import { MarketplacePage } from '@/pages/MarketplacePage'
+import { ListingDetailPage } from '@/pages/ListingDetailPage'
+import { CreateListingPage } from '@/pages/CreateListingPage'
+import { EditListingPage } from '@/pages/EditListingPage'
+import { MyInquiriesPage } from '@/pages/MyInquiriesPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 function App() {
@@ -56,6 +61,32 @@ function App() {
         }
       />
       <Route path="/users/:id" element={<ProfilePage />} />
+      <Route path="/marketplace" element={<MarketplacePage />} />
+      <Route path="/marketplace/:id" element={<ListingDetailPage />} />
+      <Route
+        path="/marketplace/new"
+        element={
+          <ProtectedRoute>
+            <CreateListingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/marketplace/:id/edit"
+        element={
+          <ProtectedRoute>
+            <EditListingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/marketplace/inquiries"
+        element={
+          <ProtectedRoute>
+            <MyInquiriesPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )

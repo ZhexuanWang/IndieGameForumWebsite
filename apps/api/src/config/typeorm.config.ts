@@ -8,6 +8,8 @@ import { ForumThread } from '../forum/entities/forum-thread.entity'
 import { ForumPost } from '../forum/entities/forum-post.entity'
 import { Like } from '../likes/entities/like.entity'
 import { Follow } from '../follows/entities/follow.entity'
+import { MarketListing } from '../marketplace/entities/market-listing.entity'
+import { Inquiry } from '../marketplace/entities/inquiry.entity'
 
 export function typeOrmConfig(): TypeOrmModuleOptions {
   return {
@@ -27,6 +29,8 @@ export function typeOrmConfig(): TypeOrmModuleOptions {
       ForumPost,
       Like,
       Follow,
+      MarketListing,
+      Inquiry,
     ],
     synchronize: process.env.NODE_ENV !== 'production',
     logging: process.env.NODE_ENV === 'development' ? ['error'] : false,

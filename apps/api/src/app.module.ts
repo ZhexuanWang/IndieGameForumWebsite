@@ -9,6 +9,7 @@ import { ProjectsModule } from './projects/projects.module'
 import { ForumModule } from './forum/forum.module'
 import { LikesModule } from './likes/likes.module'
 import { FollowsModule } from './follows/follows.module'
+import { MarketplaceModule } from './marketplace/marketplace.module'
 import { SeedModule } from './seed/seed.module'
 
 @Module({
@@ -22,6 +23,7 @@ import { SeedModule } from './seed/seed.module'
     ForumModule,
     LikesModule,
     FollowsModule,
+    MarketplaceModule,
     SeedModule,
   ],
 })
