@@ -291,6 +291,14 @@ Planned for future versions:
 - Added a `ToastContext`/`ToastProvider` with `useToast` hook and fixed provider ordering in `main.tsx` so `AuthProvider` can trigger toasts.
 - Wired toast notifications to login, register, logout, project create/update/delete, marketplace listing create/update/delete, inquiry send, and admin role changes.
 - Added a Playwright E2E test for the search flow (`tests/search.spec.ts`) that creates a project and verifies keyword search returns results.
+- **Style alignment (post-release polish):** aligned the design system with `docs/reference/flashdev-spa/flashdev-spa.html`:
+  - Replaced the cyan-forward palette with the reference dark-luxury purple/blue palette and orange accent (`oklch`-inspired hex values).
+  - Updated `tailwind.config.ts` colors, fonts, shadows, and border radius to match the reference tokens.
+  - Rewrote `index.css` with the reference scanline overlay, component layer (cards, buttons, inputs, chips), and hover lift/glow effects.
+  - Restyled `Nav.tsx` to match the reference sticky glass nav: active link state, integrated search input, and mobile toggle.
+  - Restyled `Footer.tsx` to match the reference multi-column footer.
+  - Restyled `HomePage.tsx` to match the reference launcher hero: kicker badge, large title, feature cards, and stats bar.
+  - Updated E2E home/auth assertions to match the new hero title.
 
 ### Verification (v0.07)
 - `bun install` completes without errors.

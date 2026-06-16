@@ -20,7 +20,7 @@ test('register, login and logout flow', async ({ page }) => {
 
   expect(registerResponse.status()).toBe(201)
   await page.waitForURL('/', { timeout: 15000 })
-  await expect(page.locator('h1')).toContainText('FlashDev Indie Game Forum')
+  await expect(page.locator('h1')).toContainText('Built for Indie Games')
 
   await page.locator('[data-testid="user-menu"]').click()
   await page.locator('[data-testid="logout-button"]').click()
