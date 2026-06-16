@@ -3,6 +3,7 @@ import type {
   PaginatedResponse,
   Project,
   ProjectCategory,
+  ProjectFile,
   ProjectStatus,
   ProjectType,
 } from '@flashdev/gameweb-shared'
@@ -59,4 +60,21 @@ export const projectsApi = {
     api.patch<Project>(`/projects/${id}`, dto).then(r => r.data),
 
   remove: (id: string) => api.delete(`/projects/${id}`).then(r => r.data),
+
+  files: (id: string) =>
+    api.get<ProjectFile[]>(`/projects/${id}/files`).then(r => r.data),
+
+  addFile: (
+    id: string,
+    dto: {
+      url: string
+      originalName: string
+      mimeType: string
+      size: number
+      version: string | null
+    },
+  ) => api.post<ProjectFile>(`/projects/${id}/files`, dto).then(r => r.data),
+
+  removeFile: (projectId: string, fileId: string) =>
+    api.delete(`/projects/${projectId}/files/${fileId}`).then(r => r.data),
 }

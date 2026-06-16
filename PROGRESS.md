@@ -15,9 +15,9 @@ The project mirrors the architecture, stack, and conventions of the main FlashDe
 **Default UI language:** English.  
 **Versioning:** `v0.0x`.
 
-## Current Version: v0.05
+## Current Version: v0.06
 
-v0.05 adds the Marketplace Module: listings for selling, buying, promoting, and hosting indie games or services, plus an inquiry system so buyers and sellers can connect without handling payments in-app.
+v0.06 adds Media Uploads & Hosting: a local-disk upload service for project thumbnails and downloadable files, plus project file management so developers can distribute builds, source archives, and demos directly from a project page.
 
 ## Tech Stack
 
@@ -71,6 +71,7 @@ Implemented in v0.02–v0.03:
 - **follows** — `id` (UUID PK), `follower_id` FK, `following_id` FK, `created_at`
 - **market_listings** — `id` (UUID PK), `type` enum (`sell`/`buy`/`promo`/`host`), `project_id` FK (optional), `seller_id` FK, `title`, `description`, `price`, `status` enum (`draft`/`published`/`closed`), `created_at`, `updated_at`
 - **inquiries** — `id` (UUID PK), `listing_id` FK, `sender_id` FK, `message`, `status` enum (`pending`/`replied`/`closed`), `created_at`, `updated_at`
+- **project_files** — `id` (UUID PK), `project_id` FK, `original_name`, `filename`, `mime_type`, `size`, `file_url`, `version`, `created_at`
 
 Planned for future versions:
 
@@ -86,7 +87,8 @@ Planned for future versions:
 | 3 | Forum & Project Core API | v0.03 | done |
 | 4 | Frontend Pages & API Integration | v0.04 | done |
 | 5 | Marketplace Module | v0.05 | done |
-| 6 | Media Uploads & Hosting | v0.06 | planned |
+| 6 | Media Uploads & Hosting | v0.06 | done |
+| 7 | Search, Admin & Polish | v0.07 | planned |
 | 7 | Search, Admin & Polish | v0.07 | planned |
 
 ## Current Progress Detail (v0.01)
@@ -235,6 +237,37 @@ Planned for future versions:
   - View listing detail with seller info, price, and inquiry count.
   - Send an inquiry as another user and view it under My Inquiries.
   - Seller can update inquiry status and edit/delete their own listings.
+
+## Current Progress Detail (v0.06)
+
+### Completed
+- Added `multer` for multipart uploads and created `UploadsModule` with `POST /api/uploads` endpoint (JWT required).
+- Configured upload storage under `uploads/` with UUID filenames, file type whitelist (images, archives, PDFs), and 50 MB size limit.
+- Added `ProjectFile` entity and registered it in TypeORM; linked files to projects with cascade delete.
+- Created `ProjectFilesService` and `ProjectFilesController` with endpoints:
+  - `GET /api/projects/:id/files` (public)
+  - `POST /api/projects/:id/files` (owner/admin/company)
+  - `DELETE /api/projects/:id/files/:fileId` (owner/admin/company)
+- Updated `ProjectsService` to load `files` in project detail and delete physical files when a project is removed.
+- Updated shared `ProjectFile` type and added optional `files` array to `Project`.
+- Frontend:
+  - Added `uploads.ts` API wrapper.
+  - Added reusable `FileInput` component with upload state, error display, and image preview.
+  - Replaced the `thumbnailUrl` text field in `ProjectForm` with thumbnail upload.
+  - Added `ProjectFilesManager` component on the edit page for uploading/removing project files with optional version labels.
+  - Added a Downloads section to `ProjectDetailPage` showing file cards with size, version, and download links.
+- Added API unit tests for `ProjectFilesService`, a Vitest module test for `uploads.ts`, and a Playwright E2E test for project thumbnail + file upload flow.
+
+### Verification (v0.06)
+- `bun install` completes without errors.
+- `bun run build:shared`, `bun run build:api`, `bun run build:web` all succeed.
+- `bun run --cwd apps/api test` passes (5 suites, 25 tests).
+- `bun run --cwd apps/web test` passes (5 suites, 19 tests).
+- `bun run --cwd apps/web test:e2e` passes (home, navigation, auth, marketplace, and project upload flows).
+- Manual checks:
+  - Create a project with an uploaded thumbnail; detail page displays the image.
+  - Edit the project to upload a ZIP file; detail page shows Downloads with the file.
+  - Delete the project; associated files are removed from `uploads/`.
 
 ## Project Goals
 

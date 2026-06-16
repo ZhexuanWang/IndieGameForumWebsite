@@ -35,7 +35,14 @@ export const createProjectSchema = z.object({
   categoryId: z.string().uuid().optional().or(z.literal('')),
   price: z.number().min(0).optional(),
   tagsString: z.string().optional(),
-  thumbnailUrl: z.string().url().optional().or(z.literal('')),
+  thumbnailUrl: z
+    .string()
+    .regex(
+      /^(\/uploads\/|https?:\/\/)/,
+      'Must be a valid URL or uploaded file path',
+    )
+    .optional()
+    .or(z.literal('')),
   demoUrl: z.string().url().optional().or(z.literal('')),
 })
 

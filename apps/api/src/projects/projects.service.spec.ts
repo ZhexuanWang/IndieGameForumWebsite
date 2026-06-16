@@ -4,6 +4,7 @@ import { Repository } from 'typeorm'
 import { ProjectsService } from './projects.service'
 import { Project } from './entities/project.entity'
 import { ProjectCategory } from './entities/project-category.entity'
+import { ProjectFile } from './entities/project-file.entity'
 import { User } from '../users/entities/user.entity'
 import { NotFoundException, ForbiddenException } from '@nestjs/common'
 
@@ -29,6 +30,7 @@ describe('ProjectsService', () => {
   let service: ProjectsService
   let projectRepo: Partial<Record<keyof Repository<Project>, jest.Mock>>
   let categoryRepo: Partial<Record<keyof Repository<ProjectCategory>, jest.Mock>>
+  let fileRepo: Partial<Record<keyof Repository<ProjectFile>, jest.Mock>>
 
   beforeEach(async () => {
     projectRepo = {
@@ -41,12 +43,17 @@ describe('ProjectsService', () => {
     categoryRepo = {
       find: jest.fn().mockResolvedValue([]),
     }
+    fileRepo = {
+      find: jest.fn().mockResolvedValue([]),
+      remove: jest.fn().mockResolvedValue(undefined),
+    }
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectsService,
         { provide: getRepositoryToken(Project), useValue: projectRepo },
         { provide: getRepositoryToken(ProjectCategory), useValue: categoryRepo },
+        { provide: getRepositoryToken(ProjectFile), useValue: fileRepo },
       ],
     }).compile()
 
@@ -83,5 +90,11 @@ describe('ProjectsService', () => {
     await expect(
       service.update('proj-1', { title: 'Hacked' }, 'user-2', 'user'),
     ).rejects.toThrow(ForbiddenException)
+  })
+
+  it('should allow owner to delete project', async () => {
+    await service.remove('proj-1', 'user-1', 'user')
+    expect(projectRepo.remove).toHaveBeenCalled()
+    expect(fileRepo.find).toHaveBeenCalledWith({ where: { projectId: 'proj-1' } })
   })
 })

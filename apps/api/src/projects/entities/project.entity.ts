@@ -1,11 +1,12 @@
 import {
   Entity, PrimaryGeneratedColumn, Column,
-  ManyToOne, JoinColumn,
+  ManyToOne, JoinColumn, OneToMany,
   CreateDateColumn, UpdateDateColumn,
 } from 'typeorm'
 import type { ProjectType, ProjectStatus } from '@flashdev/gameweb-shared'
 import { User } from '../../users/entities/user.entity'
 import type { ProjectCategory } from './project-category.entity'
+import type { ProjectFile } from './project-file.entity'
 
 @Entity('projects')
 export class Project {
@@ -53,6 +54,9 @@ export class Project {
 
   @Column({ name: 'category_id', type: 'uuid', nullable: true })
   categoryId: string | null
+
+  @OneToMany('ProjectFile', 'project')
+  files?: ProjectFile[]
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
 import { ErrorMessage } from '@/components/ui/ErrorMessage'
+import { FileInput } from '@/components/ui/FileInput'
 
 interface ProjectFormProps {
   mode: 'create' | 'edit'
@@ -48,6 +49,7 @@ export function ProjectForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<ProjectFormSchema>({
     resolver: zodResolver(projectFormSchema),
@@ -100,6 +102,7 @@ export function ProjectForm({
       <ErrorMessage message={error} />
 
       <Input
+        id="title"
         label="Title"
         placeholder="Project title"
         {...register('title')}
@@ -107,6 +110,7 @@ export function ProjectForm({
       />
 
       <Textarea
+        id="description"
         label="Description"
         placeholder="Describe your project..."
         {...register('description')}
@@ -115,12 +119,14 @@ export function ProjectForm({
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Select
+          id="type"
           label="Type"
           options={typeOptions}
           {...register('type')}
           error={errors.type?.message}
         />
         <Select
+          id="categoryId"
           label="Category"
           options={categoryOptions}
           {...register('categoryId')}
@@ -130,6 +136,7 @@ export function ProjectForm({
 
       {type === 'sale' && (
         <Input
+          id="price"
           type="number"
           step="0.01"
           min="0"
@@ -141,20 +148,31 @@ export function ProjectForm({
       )}
 
       <Input
+        id="tagsString"
         label="Tags"
         placeholder="e.g. pixel-art, rpg, unity (comma separated)"
         {...register('tagsString')}
         error={errors.tagsString?.message}
       />
 
-      <Input
-        label="Thumbnail URL"
-        placeholder="https://..."
-        {...register('thumbnailUrl')}
+      <FileInput
+        label="Thumbnail"
+        accept="image/*"
+        preview
+        inputTestId="thumbnail-input"
+        currentUrl={watch('thumbnailUrl')}
+        currentName={watch('thumbnailUrl')?.split('/').pop()}
+        onUpload={result =>
+          setValue('thumbnailUrl', result.url, { shouldValidate: true })
+        }
+        onClear={() =>
+          setValue('thumbnailUrl', '', { shouldValidate: true })
+        }
         error={errors.thumbnailUrl?.message}
       />
 
       <Input
+        id="demoUrl"
         label="Demo URL"
         placeholder="https://..."
         {...register('demoUrl')}
@@ -163,6 +181,7 @@ export function ProjectForm({
 
       {mode === 'edit' && (
         <Select
+          id="status"
           label="Status"
           options={statusOptions}
           {...register('status')}

@@ -6,6 +6,8 @@ import {
   Pencil,
   Trash2,
   User as UserIcon,
+  Download,
+  File as FileIcon,
 } from 'lucide-react'
 import type { Project, ProjectCategory } from '@flashdev/gameweb-shared'
 import { useAuth } from '@/contexts/AuthContext'
@@ -17,6 +19,7 @@ import { ErrorMessage } from '@/components/ui/ErrorMessage'
 import { Tag } from '@/components/ui/Tag'
 import { LikeButton } from '@/components/social/LikeButton'
 import { Layout } from '@/components/layout/Layout'
+import { formatBytes } from '@/components/ui/FileInput'
 
 const typeLabel: Record<string, string> = {
   showcase: 'Showcase',
@@ -182,6 +185,37 @@ export function ProjectDetailPage() {
                   {tag}
                 </span>
               ))}
+            </div>
+          )}
+
+          {project.files && project.files.length > 0 && (
+            <div className="mt-8">
+              <h2 className="mb-3 text-lg font-medium text-ink">Downloads</h2>
+              <div className="space-y-2">
+                {project.files.map(file => (
+                  <a
+                    key={file.id}
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between rounded-lg border border-edge bg-surface-0 p-3 hover:border-brand-cyan/30"
+                  >
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <FileIcon className="h-5 w-5 shrink-0 text-ink-muted" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">
+                          {file.originalName}
+                        </p>
+                        <p className="text-xs text-ink-muted">
+                          {formatBytes(file.size)}
+                          {file.version ? ` · ${file.version}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <Download className="h-4 w-4 shrink-0 text-brand-cyan" />
+                  </a>
+                ))}
+              </div>
             </div>
           )}
 

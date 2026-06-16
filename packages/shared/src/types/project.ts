@@ -20,6 +20,7 @@ export interface Project {
   tags: string[]
   thumbnailUrl: string | null
   demoUrl: string | null
+  files?: ProjectFile[]
   createdAt: string
   updatedAt: string
 }
@@ -27,6 +28,11 @@ export interface Project {
 export interface ProjectFile {
   id: string
   projectId: string
+  originalName: string
+  filename: string
+  mimeType: string
+  size: number
   fileUrl: string
-  fileType: string
+  version: string | null
+  createdAt: string
 }

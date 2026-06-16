@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, ILike, type FindOptionsWhere } from 'typeorm'
+import { promises as fs } from 'fs'
+import { join } from 'path'
 import { Project } from './entities/project.entity'
 import { ProjectCategory } from './entities/project-category.entity'
+import { ProjectFile } from './entities/project-file.entity'
+import { UPLOAD_DIR } from '../uploads/upload.config'
 import { CreateProjectDto } from './dto/create-project.dto'
 import { UpdateProjectDto } from './dto/update-project.dto'
 import { ProjectQueryDto } from './dto/project-query.dto'
@@ -15,6 +19,7 @@ export class ProjectsService {
   constructor(
     @InjectRepository(Project) private readonly projectRepo: Repository<Project>,
     @InjectRepository(ProjectCategory) private readonly categoryRepo: Repository<ProjectCategory>,
+    @InjectRepository(ProjectFile) private readonly fileRepo: Repository<ProjectFile>,
   ) {}
 
   async findAll(query: ProjectQueryDto) {
@@ -48,7 +53,7 @@ export class ProjectsService {
   async findOne(id: string) {
     const project = await this.projectRepo.findOne({
       where: { id },
-      relations: { author: true, category: true },
+      relations: { author: true, category: true, files: true },
       select: { author: AUTHOR_SELECT },
     })
     if (!project) throw new NotFoundException('Project not found')
@@ -78,6 +83,12 @@ export class ProjectsService {
     if (project.authorId !== userId && userRole === 'user') {
       throw new ForbiddenException("Cannot delete another user's project")
     }
+
+    const files = await this.fileRepo.find({ where: { projectId: id } })
+    for (const file of files) {
+      await fs.unlink(join(UPLOAD_DIR, file.filename)).catch(() => {})
+    }
+
     await this.projectRepo.remove(project)
   }
 

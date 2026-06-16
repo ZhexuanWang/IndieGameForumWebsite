@@ -4,6 +4,7 @@ import type { Project } from '@flashdev/gameweb-shared'
 import { useAuth } from '@/contexts/AuthContext'
 import { projectsApi } from '@/lib/projects'
 import { ProjectForm } from '@/components/projects/ProjectForm'
+import { ProjectFilesManager } from '@/components/projects/ProjectFilesManager'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ErrorMessage } from '@/components/ui/ErrorMessage'
 import { Layout } from '@/components/layout/Layout'
@@ -17,23 +18,29 @@ export function EditProjectPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
+  const loadProject = async () => {
     if (!id) return
-    projectsApi
-      .get(id)
-      .then(data => {
-        if (
-          data.authorId !== user?.id &&
-          user?.role !== 'admin' &&
-          user?.role !== 'company'
-        ) {
-          setError('You do not have permission to edit this project')
-        } else {
-          setProject(data)
-        }
-      })
-      .catch(() => setError('Project not found'))
-      .finally(() => setIsLoading(false))
+    setIsLoading(true)
+    try {
+      const data = await projectsApi.get(id)
+      if (
+        data.authorId !== user?.id &&
+        user?.role !== 'admin' &&
+        user?.role !== 'company'
+      ) {
+        setError('You do not have permission to edit this project')
+      } else {
+        setProject(data)
+      }
+    } catch {
+      setError('Project not found')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadProject()
   }, [id, user])
 
   const handleSubmit = async (values: Record<string, unknown>) => {
@@ -94,6 +101,14 @@ export function EditProjectPage() {
           error={error}
           submitLabel="Save Changes"
         />
+
+        <div className="mt-10 border-t border-edge pt-8">
+          <ProjectFilesManager
+            projectId={project.id}
+            files={project.files ?? []}
+            onChange={loadProject}
+          />
+        </div>
       </div>
     </Layout>
   )

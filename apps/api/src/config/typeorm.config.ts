@@ -3,6 +3,7 @@ import { User } from '../users/entities/user.entity'
 import { UserProfile } from '../users/entities/user-profile.entity'
 import { Project } from '../projects/entities/project.entity'
 import { ProjectCategory } from '../projects/entities/project-category.entity'
+import { ProjectFile } from '../projects/entities/project-file.entity'
 import { ForumCategory } from '../forum/entities/forum-category.entity'
 import { ForumThread } from '../forum/entities/forum-thread.entity'
 import { ForumPost } from '../forum/entities/forum-post.entity'
@@ -24,6 +25,7 @@ export function typeOrmConfig(): TypeOrmModuleOptions {
       UserProfile,
       ProjectCategory,
       Project,
+      ProjectFile,
       ForumCategory,
       ForumThread,
       ForumPost,
